@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "754464349604",
+    "firebase_url": "https://naija-dentist-bb54e.firebaseio.com",
+    "project_id": "naija-dentist-bb54e",
+    "storage_bucket": "naija-dentist-bb54e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754464349604:android:9281b2219889b3a6cf3531",
+        "android_client_info": {
+          "package_name": "abdeveloper.doctor_online"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "754464349604-hb4cr46hb89s82fgd2rhs6fo75qi6vr7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4mLF53VwC2hpzA9P56BbT-XCr597zzQE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "754464349604-hb4cr46hb89s82fgd2rhs6fo75qi6vr7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
