@@ -1,6 +1,7 @@
 import 'package:doctorapp/Controllers/LoginController.dart';
 import 'package:doctorapp/DentistSetupProfile.dart';
 import 'package:doctorapp/SetupProfile.dart';
+import 'package:doctorapp/VeriicationScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,8 @@ class SignUp extends State<_SignUp> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
-
+  bool _displayMsg = false;
+  var _msg = "Select profile Image";
   @override
   Widget build(BuildContext context) {
     _context = context;
@@ -62,6 +64,22 @@ class SignUp extends State<_SignUp> {
                         fontFamily: 'Oxygen'),
                   ),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                _displayMsg
+                    ? Text(
+                        '$_msg',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red[500],
+                            fontFamily: 'Oxygen'),
+                      )
+                    : Container(),
+                SizedBox(
+                  height: 10,
+                ),
                 Form(
                     key: _formKey,
                     child: Column(
@@ -90,7 +108,6 @@ class SignUp extends State<_SignUp> {
                             padding: EdgeInsets.all(10.0),
                             child: TextFormField(
                                 autofocus: true,
-
                                 textInputAction: TextInputAction.next,
                                 onFieldSubmitted: (_) =>
                                     FocusScope.of(context).nextFocus(),
@@ -98,7 +115,6 @@ class SignUp extends State<_SignUp> {
                                   _password = text;
                                 },
                                 keyboardType: TextInputType.text,
-                            
                                 validator: validatePassword,
                                 onSaved: (String input) => _password = input,
                                 obscureText: true,
@@ -222,42 +238,53 @@ class SignUp extends State<_SignUp> {
 
   void _functionSignUp() {
     try {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => DentistSetupProfile('_email')),
-      );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => DentistSetupProfile('_email')),
+      // );
 
-      // _email = _email.replaceAll(new RegExp(r"\s+"), "");
-      // _password = _password.trim();
-      // _validateInputs();
-      // if (_autoValidate == false) {
-      //   if (_checkBoxVal) {
-      //     print('Yes');
-      //     if (_selectedtype != 'Account Type') {
-      //       LoginController loginController = new LoginController();
-      //       print('come');
-      //       Future<String> user =
-      //           loginController.CreateNewUser(_email, _password);
-      //       if (user.toString().compareTo(' ') != 0) {
-      //         print('successful');
-      //         if (_selectedtype == 'Patient') {
-      //           Navigator.push(
-      //             context,
-      //             MaterialPageRoute(builder: (context) => SetupProfile(_email)),
-      //           );
-      //         }
-      //         else if (_selectedtype == 'Doctor') {
-      //           Navigator.push(
-      //             context,
-      //             MaterialPageRoute(builder: (context) => DentistSetupProfile(_email)),
-      //           );
-      //         }
-      //       } else {
-      //         print('unsuccessful');
-      //       }
-      //     }
-      //   }
-      // }
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => SetupProfile('_email')),
+      // );
+      if ((_email == null) | (_password == null)) {
+        setState(() {
+          _displayMsg = true;
+          _msg = "Incomplete Fields";
+          return;
+        });
+      }
+      _email = _email.replaceAll(new RegExp(r"\s+"), "");
+      _password = _password.trim();
+      _validateInputs();
+      if (_autoValidate == false) {
+        if (_checkBoxVal) {
+          print('Yes');
+          if (_selectedtype != 'Account Type') {
+            LoginController loginController = new LoginController();
+            print('come');
+            Future<String> user =
+                loginController.CreateNewUser(_email, _password);
+            if (user.toString().compareTo(' ') != 0) {
+              print('successful');
+              if (_selectedtype == 'Patient') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) =>VerificationScreen_('P',_email)),
+                );
+              } else if (_selectedtype == 'Doctor') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => VerificationScreen_('D',_email)),
+                );
+              }
+            } else {
+              print('unsuccessful');
+            }
+          }
+        }
+      }
     } catch (e) {
       print(e.toString());
     }

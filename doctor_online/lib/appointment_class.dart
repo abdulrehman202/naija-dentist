@@ -1,9 +1,10 @@
 
 class appointment_class{
 
-  String doctor_name,profile_pic,contact_hours,age,field;
-  int rating;
+  var doctor_name,YOP,Description,OAddress,rating,doctorID;
 
-  appointment_class({this.doctor_name,this.profile_pic,this.contact_hours,this.age,this.field,this.rating});
+  var uploadedFileURL;
+
+  appointment_class({this.doctor_name,this.YOP,this.Description,this.OAddress,this.rating,this.uploadedFileURL});
 
 }

@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:doctorapp/DoctorViewAppointments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'Classes/Doctor.dart';
 import 'Classes/Person.dart';
@@ -36,16 +38,19 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
   var _officeAddressController = new TextEditingController();
 
   var _yearController = new TextEditingController();
-
+  File _image;
+  File _certificate;
   var _descriptionController = new TextEditingController();
   _DentistSetProfile(this.email);
   bool _checkBoxVal = true;
   String _selectedGender;
-  String _selectedtype;
   String _selectedcity;
   String _selectedstate;
   String _selectedcountry;
 
+  bool _displayMsg = false;
+
+  var _msg = "Select profile Image";
   var _lastNameController = new TextEditingController();
 
   var _mobileNumberController = new TextEditingController();
@@ -91,6 +96,33 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
+                    fontFamily: 'Oxygen'),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            _displayMsg
+                ? Text(
+                    '$_msg',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[500],
+                        fontFamily: 'Oxygen'),
+                  )
+                : Container(),
+            SizedBox(
+              height: 10,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '*All the fields are required',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red[500],
                     fontFamily: 'Oxygen'),
               ),
             ),
@@ -250,12 +282,72 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
                 );
               }).toList(),
             )),
+            Column(
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    _image != null
+                        ? Image.asset(
+                            _image.path,
+                            height: 150,
+                          )
+                        : Container(height: 80),
+                    Column(
+                      children: <Widget>[
+                        _image == null
+                            ? RaisedButton(
+                                child: Text(
+                                  'Choose Profile Pic',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black,
+                                      fontFamily: 'Oxygen'),
+                                ),
+                                onPressed: chooseFile,
+                                color: Colors.cyan,
+                              )
+                            : Container(),
+                        _image != null
+                            ? RaisedButton.icon(
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  'Clear Selection',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.white,
+                                      fontFamily: 'Oxygen'),
+                                ),
+                                color: Colors.red[400],
+                                onPressed: clearSelection,
+                              )
+                            : Container(),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
             Container(
               padding: EdgeInsets.all(5.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  CheckBoxClass(),
+                  Checkbox(
+                    value: _checkBoxVal,
+                    activeColor: Colors.orange,
+                    onChanged: (newValue) {
+                      setState(() {
+                        print(newValue);
+                        _checkBoxVal = newValue;
+                      });
+                    },
+                  ),
                   Container(
                     child: Text(
                       'By creating your account, your are agree\nto our terms of use & privacy policy ',
@@ -278,7 +370,7 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
                       padding: EdgeInsets.all(5.0),
                       child: RaisedButton(
                         onPressed: () {
-                          getFilePicker();
+                          chooseCertificate();
                         },
                         color: Color(0xff4e45ff),
                         child: Text(
@@ -320,10 +412,65 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
 
   Future<void> getFilePicker() async {
     File file = await FilePicker.getFile();
+    _certificate = file;
+  }
+
+  void clearSelection() {
+    setState(() {
+      _image = null;
+    });
+  }
+
+  Future chooseFile() async {
+    await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
+      setState(() {
+        _image = image;
+      });
+    });
+  }
+
+  Future chooseCertificate() async {
+    await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
+      setState(() {
+        _certificate = image;
+      });
+    });
   }
 
   Future<void> SaveDoctorData() async {
-    if (_checkBoxVal) {
+    if (_checkBoxVal == true) {
+      if (_image == null) {
+        setState(() {
+          _msg = "Please upload the profile pic";
+          _displayMsg = true;
+        });
+        return;
+      }
+      if (_certificate == null) {
+        setState(() {
+          _msg = "Please upload your certificate";
+          _displayMsg = true;
+        });
+        return;
+      }
+
+      if ((_firstNameController.text == '') |
+          (_lastNameController.text == '') |
+          (_mobileNumberController.text == '') |
+          (_officeAddressController.text == '') |
+          (_yearController.text == '') |
+          (_descriptionController.text == '') |
+          (_selectedGender == null) |
+          (_selectedstate == null) |
+          (_selectedcity == null) |
+          (_selectedcountry == null)) {
+        setState(() {
+          _msg = "You are required to fill all the fields";
+          _displayMsg = true;
+        });
+        return;
+      }
+
       Person _person = new Person(
           _firstNameController.text,
           _lastNameController.text,
@@ -337,37 +484,19 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
       Doctor _doctor = new Doctor(_officeAddressController.text,
           _yearController.text, _descriptionController.text);
       DoctorController controller = new DoctorController();
-      bool result = await controller.addDoctorRecord(_person, _doctor);
+      bool result = await controller.addDoctorRecord(_person, _doctor,_image,_certificate);
       print(result);
       if (result == true) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => appointment()),
+          MaterialPageRoute(builder: (context) => DoctorViewAppointments()),
         );
       }
+    } else {
+      setState(() {
+        _msg = "You must agree to our terms of use & privacy policy";
+        _displayMsg = true;
+      });
     }
-  }
-}
-
-class CheckBoxClass extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _CheckBox();
-}
-
-class _CheckBox extends State<StatefulWidget> {
-  bool _checkBoxVal = false;
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Checkbox(
-      value: _checkBoxVal,
-      activeColor: Colors.orange,
-      onChanged: (newValue) {
-        setState(() {
-          _checkBoxVal = newValue;
-        });
-      },
-    );
   }
 }

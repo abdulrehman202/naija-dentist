@@ -1,12 +1,13 @@
-import 'package:doctorapp/Chat_Screen.dart';
-import 'package:doctorapp/Controllers/LoginController.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctorapp/Register.dart';
-import 'package:doctorapp/appointment.dart';
+import 'package:doctorapp/SetupProfile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'Controllers/LoginController.dart';
 import 'DentistSetupProfile.dart';
-import 'SetupProfile.dart';
+import 'DoctorViewAppointments.dart';
+import 'appointment.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,80 +36,68 @@ class Login extends StatefulWidget {
 class _Login extends State<Login> {
   var _email, _password;
   bool _autoValidate = false;
+  bool _displayMsg = false;
+  var _msg = "Select profile Image";
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       resizeToAvoidBottomPadding: false,
-      body: Stack(
-        children: <Widget>[
-          Container(
-            width: 375.0,
-            height: 812.0,
-            decoration: BoxDecoration(
-              color: const Color(0xffffffff),
-            ),
-          ),
-          Container(
-            width: 375.0,
-            height: 812.0,
-            decoration: BoxDecoration(
-              color: const Color(0xffffffff),
-            ),
-          ),
-          Container(
-            width: 375.0,
-            height: 812.0,
-            decoration: BoxDecoration(
-              color: const Color(0xffffffff),
-            ),
-          ),
-          Transform.translate(
-              //Used to display Doctor's Logo
-              offset: Offset(79.0, 60.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    width: 250.0,
-                    height: 150.0,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: const AssetImage('images/dr.jpeg'),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                height: 100,
+              ),
+              Container(
+                width: 250.0,
+                height: 150.0,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: const AssetImage('images/dr.jpeg'),
+                    fit: BoxFit.fill,
                   ),
-                ],
-              )),
-          Transform.translate(
-              //Used to display Login Logo
-              offset: Offset(155.0, 215.0),
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    child: Text(
-                      'Login', //Login logo
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                child: Text(
+                  'Login', //Login logo
+                  style: TextStyle(
+                    fontFamily: 'Oxygen',
+                    fontSize: 30,
+                    color: const Color(0xff707070),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              _displayMsg
+                  ? Text(
+                      '$_msg',
                       style: TextStyle(
-                        fontFamily: 'Oxygen',
-                        fontSize: 30,
-                        color: const Color(0xff707070),
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  )
-                ],
-              )),
-          Transform.translate(
-              //Used to display textbox and hint for email/username
-              offset: Offset(15, 270),
-              child: Form(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[500],
+                          fontFamily: 'Oxygen'),
+                    )
+                  : Container(),
+              SizedBox(
+                height: 10,
+              ),
+              Form(
                 key: _formKey,
                 child: Column(
                   children: <Widget>[
-                    Container(
-                        child: TextFormField(
+                    TextFormField(
                       autofocus: true,
                       textInputAction: TextInputAction.next,
                       onFieldSubmitted: (_) =>
@@ -126,78 +115,67 @@ class _Login extends State<Login> {
                       ),
                       onSaved: (input) => _email = input,
                       textAlign: TextAlign.left,
-                    ))
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 10),
+                      child: TextFormField(
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) =>
+                            FocusScope.of(context).nextFocus(),
+                        validator: validatePassword,
+                        onChanged: (text) {
+                          _password = text;
+                        },
+                        obscureText: true,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          filled: false,
+                          icon: Icon(Icons.lock),
+                          hintText: 'Password',
+                        ),
+                        onSaved: (input) => _password = input,
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 20),
+                      child: RaisedButton(
+                        onPressed: () {
+                          _functionSignUp();
+                        },
+                        textColor: Colors.white,
+                        padding: const EdgeInsets.all(0.0),
+                        child: Container(
+                          width: 220,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: <Color>[
+                                const Color(0xff3126c9),
+                                const Color(0xff857dfa)
+                              ],
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(10.0),
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontFamily: 'Oxygen',
+                              fontSize: 14,
+                              color: const Color(0xffffffff),
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
-              )),
-          Transform.translate(
-              //Used to display textbox and hint for Password
-              offset: Offset(15, 360),
-              child: Column(
-                children: <Widget>[
-                  Container(
-                      child: TextFormField(
-                    autofocus: true,
-                    textInputAction: TextInputAction.next,
-                    onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-                    validator: validatePassword,
-                   onChanged: (text) {
-                        _password = text;
-                      },
-                    obscureText: true,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      filled: false,
-                      icon: Icon(Icons.lock),
-                      hintText: 'Password',
-                    ),
-                    onSaved: (input) => _password = input,
-                    textAlign: TextAlign.left,
-                  ))
-                ],
-              )),
-          Transform.translate(
-            //Used to display Login Button
-            offset: Offset(90.0, 450.0),
-            child: Column(
-              children: <Widget>[
-                RaisedButton(
-                  onPressed: () {
-                    _functionSignUp();
-                  },
-                  textColor: Colors.white,
-                  padding: const EdgeInsets.all(0.0),
-                  child: Container(
-                    width: 220,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: <Color>[
-                          const Color(0xff3126c9),
-                          const Color(0xff857dfa)
-                        ],
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(10.0),
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        fontFamily: 'Oxygen',
-                        fontSize: 14,
-                        color: const Color(0xffffffff),
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-          Transform.translate(
-              //Used to display "Do not have an Account?" label
-              offset: Offset(85.0, 550.0),
-              child: Column(
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Container(
                     child: Text(
@@ -209,14 +187,7 @@ class _Login extends State<Login> {
                       ),
                       textAlign: TextAlign.left,
                     ),
-                  )
-                ],
-              )),
-          Transform.translate(
-              //Used to display "Register" label when pressed
-              offset: Offset(250.0, 535.0),
-              child: Column(
-                children: <Widget>[
+                  ),
                   Container(
                     child: FlatButton(
                       child: Text(
@@ -233,34 +204,78 @@ class _Login extends State<Login> {
                             builder: (context) => SignUpClass()));
                       },
                     ),
-                  )
+                  ),
                 ],
-              ))
-        ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  void _functionSignUp() {
+  Future<void> _functionSignUp() async {
     try {
       // Navigator.push(
       //   context,
-      //   MaterialPageRoute(builder: (context) => DentistSetupProfile('_email')),
+      //   MaterialPageRoute(builder: (context) => PatientViewDoctors())
       // );
+
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => SetupProfile('email'))
+      // );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => DentistSetupProfile('email'))
+      // );
+      //  Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => DoctorViewAppointments())
+      // );
+      // Navigator.push(context,
+      //     MaterialPageRoute(builder: (context) => PatientViewDoctors()));
+      if ((_email == null) | (_password == null)) {
+        setState(() {
+          _displayMsg=true;
+          _msg="Incomplete Fields";
+          return;
+        });
+      }
       _email = _email.replaceAll(new RegExp(r"\s+"), "");
       _password = _password.trim();
       _validateInputs();
       if (_autoValidate == false) {
         LoginController loginController = new LoginController();
-        Future<String> user = loginController.CheckSignIn(_email, _password);
+        String user = await loginController.CheckSignIn(_email, _password);
         if (user.toString().compareTo(' ') != 0) {
           print('successful');
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => appointment()),
-          );
+
+          DocumentSnapshot value01 = await Firestore.instance
+              .collection("Person")
+              .document(user)
+              .get();
+          if (value01.data != null) {
+            var type = value01.data["PType"];
+            if (type == 'P') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PatientViewDoctors()),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DoctorViewAppointments()),
+              );
+            }
+          }
         } else {
-          print('unsuccessful');
+          setState(() {
+          _displayMsg=true;
+          _msg="Incorrect Username or Password";
+          return;
+        });
         }
       }
     } catch (e) {
@@ -270,11 +285,11 @@ class _Login extends State<Login> {
 
   void _validateInputs() {
     if (_formKey.currentState.validate()) {
-//    If all data are correct then save data to out variables
+      //    If all data are correct then save data to out variables
       _formKey.currentState.save();
       _autoValidate = false;
     } else {
-//    If all data are not valid then start auto validation.
+      //    If all data are not valid then start auto validation.
       setState(() {
         _autoValidate = true;
       });
