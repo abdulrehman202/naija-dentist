@@ -1,9 +1,12 @@
+import 'package:doctorapp/Classes/DoctorAppointments.dart';
 import 'package:doctorapp/WColors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctorapp/main.dart';
 
 class ChatList extends StatelessWidget {
+  DoctorAppointments obj;
+  ChatList(this.obj);
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -11,20 +14,23 @@ class ChatList extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         //'/signup': (BuildContext context) => new SignupPage(),
       },
-      home: new ChatListPage(),
+      home: new ChatListPage(obj),
     );
   }
 }
 
 class ChatListPage extends StatefulWidget {
+  DoctorAppointments obj;
+  ChatListPage(this.obj);
   @override
-  _ChatListPageState createState() => new _ChatListPageState();
+  _ChatListPageState createState() => new _ChatListPageState(obj);
 }
 
 class _ChatListPageState extends State<ChatListPage> {
   MediaQueryData queryData;
   WColors wColors;
-
+  DoctorAppointments obj;
+  _ChatListPageState(this.obj);
   static List<String> Names = [
     'Professor',
     'Nairobi',
@@ -35,7 +41,7 @@ class _ChatListPageState extends State<ChatListPage> {
   @override
   Widget build(BuildContext context) {
     queryData = MediaQuery.of(context);
-    wColors=new WColors();
+    wColors = new WColors();
     var widthD = queryData.size.width;
     var heightD = queryData.size.height;
     return new Scaffold(
@@ -45,7 +51,7 @@ class _ChatListPageState extends State<ChatListPage> {
           children: <Widget>[
             GestureDetector(
               child: Container(
-                child: Icon(Icons.arrow_back, color:wColors.appBarIcons),
+                child: Icon(Icons.arrow_back, color: wColors.appBarIcons),
                 alignment: Alignment.topLeft,
                 width: 40,
               ),
@@ -97,7 +103,6 @@ class _ChatListPageState extends State<ChatListPage> {
         children: <Widget>[
           Container(
             child: Row(
-
               children: <Widget>[
                 Icon(
                   Icons.search,
@@ -109,7 +114,7 @@ class _ChatListPageState extends State<ChatListPage> {
                 Expanded(
                   //width: 250,
                   child: Container(
-                    constraints: BoxConstraints(minHeight: 40,maxHeight: 100),
+                    constraints: BoxConstraints(minHeight: 40, maxHeight: 100),
                     alignment: Alignment.center,
                     child: TextField(
                       expands: true,

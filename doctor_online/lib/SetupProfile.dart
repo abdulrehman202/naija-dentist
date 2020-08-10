@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:doctorapp/Classes/Patient.dart';
 import 'package:doctorapp/Classes/Person.dart';
 import 'package:doctorapp/Controllers/PatientController.dart';
 import 'package:doctorapp/appointment.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class SetupProfile extends StatelessWidget {
   String email;
@@ -11,7 +14,8 @@ class SetupProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    debugShowCheckedModeBanner: false;
+    debugShowCheckedModeBanner:
+    false;
     return MaterialApp(
       home: new _SetupProfile_(email),
     );
@@ -29,9 +33,14 @@ class _SetupProfile extends State<_SetupProfile_> {
   bool _checkBoxVal = false;
   String email;
 
+  File _image;
   var _lastNameController = new TextEditingController();
 
   var _mobileNumberController = new TextEditingController();
+
+  bool _displayMsg = false;
+
+  var _msg = "Select profile Image";
   _SetupProfile(this.email);
 
   String _selectedGender;
@@ -64,7 +73,7 @@ class _SetupProfile extends State<_SetupProfile_> {
             //physics: NeverScrollableScrollPhysics(),
             child: Column(
               /*crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,*/
+                 mainAxisAlignment: MainAxisAlignment.start,*/
               children: <Widget>[
                 Container(
                   alignment: Alignment.center,
@@ -72,7 +81,7 @@ class _SetupProfile extends State<_SetupProfile_> {
                   margin: EdgeInsets.fromLTRB(0, 25, 0, 10),
                   child: ClipRRect(
                     child: Image.asset("images/dr.jpeg"),
-//                  padding: new EdgeInsets.all(10.0),
+                    //                  padding: new EdgeInsets.all(10.0),
                   ),
                 ),
                 Container(
@@ -96,9 +105,40 @@ class _SetupProfile extends State<_SetupProfile_> {
                         fontFamily: 'Oxygen'),
                   ),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                _displayMsg
+                    ? Text(
+                        '$_msg',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red[500],
+                            fontFamily: 'Oxygen'),
+                      )
+                    : Container(),
+                SizedBox(
+                  height: 10,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '*All the fields are required',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[500],
+                        fontFamily: 'Oxygen'),
+                  ),
+                ),
                 Container(
                     padding: EdgeInsets.all(5.0),
                     child: TextFormField(
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) =>
+                            FocusScope.of(context).nextFocus(),
                         controller: _firstNameController,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(
@@ -109,6 +149,10 @@ class _SetupProfile extends State<_SetupProfile_> {
                 Container(
                     padding: EdgeInsets.all(5.0),
                     child: TextFormField(
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) =>
+                            FocusScope.of(context).nextFocus(),
                         controller: _lastNameController,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(
@@ -119,6 +163,10 @@ class _SetupProfile extends State<_SetupProfile_> {
                 Container(
                     padding: EdgeInsets.all(5.0),
                     child: TextFormField(
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) =>
+                            FocusScope.of(context).nextFocus(),
                         controller: _mobileNumberController,
                         textCapitalization: TextCapitalization.words,
                         decoration: InputDecoration(
@@ -205,28 +253,80 @@ class _SetupProfile extends State<_SetupProfile_> {
                   }).toList(),
                 )),
                 Container(
-                    padding: EdgeInsets.all(5.0),
-                    child: Row(
+                  padding: EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                          child: DropdownButton(
+                        hint: Text('Select Age'),
+                        value: _selectedtype,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedtype = newValue;
+                          });
+                        },
+                        items: _type.map((type) {
+                          return DropdownMenuItem(
+                            child: new Text(type),
+                            value: type,
+                          );
+                        }).toList(),
+                      )),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: <Widget>[
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Container(
-                            child: DropdownButton(
-                          hint: Text('Select Age'),
-                          value: _selectedtype,
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedtype = newValue;
-                            });
-                          },
-                          items: _type.map((type) {
-                            return DropdownMenuItem(
-                              child: new Text(type),
-                              value: type,
-                            );
-                          }).toList(),
-                        )),
+                        _image != null
+                            ? Image.asset(
+                                _image.path,
+                                height: 150,
+                              )
+                            : Container(height: 80),
+                        Column(
+                          children: <Widget>[
+                            _image == null
+                                ? RaisedButton(
+                                    child: Text(
+                                      'Choose Profile Pic',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          fontFamily: 'Oxygen'),
+                                    ),
+                                    onPressed: chooseFile,
+                                    color: Colors.cyan,
+                                  )
+                                : Container(),
+                            _image != null
+                                ? RaisedButton.icon(
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                    ),
+                                    label: Text(
+                                      'Clear Selection',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.white,
+                                          fontFamily: 'Oxygen'),
+                                    ),
+                                    color: Colors.red[400],
+                                    onPressed: clearSelection,
+                                  )
+                                : Container(),
+                          ],
+                        ),
                       ],
-                    )),
+                    ),
+                  ],
+                ),
                 Container(
                   padding: EdgeInsets.all(5.0),
                   child: Row(
@@ -282,6 +382,20 @@ class _SetupProfile extends State<_SetupProfile_> {
     );
   }
 
+  void clearSelection() {
+    setState(() {
+      _image = null;
+    });
+  }
+
+  Future chooseFile() async {
+    await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
+      setState(() {
+        _image = image;
+      });
+    });
+  }
+
   Future<bool> _onBackPressed() {
     print('test');
     return showDialog(
@@ -331,25 +445,56 @@ class _SetupProfile extends State<_SetupProfile_> {
   }
 
   Future<void> SavePatientData() async {
-    Person _person = new Person(
-        _firstNameController.text,
-        _lastNameController.text,
-        _mobileNumberController.text,
-        email,
-        'P',
-        _selectedGender,
-        _selectedcity,
-        _selectedcountry,
-        _selectedstate);
-    Patient _patient = new Patient(_selectedtype);
-    PatientController controller = new PatientController();
-    bool result=await controller.addPatientRecord(_person, _patient);
-    print(result);
-    if ( result== true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => appointment()),
-      );
+    if (_checkBoxVal == true) {
+      if (_image == null) {
+        setState(() {
+          _msg = "Please upload the profile pic";
+          _displayMsg = true;
+        });
+        return;
+      }
+
+      if ((_firstNameController.text == '') |
+          (_lastNameController.text == '') |
+          (_mobileNumberController.text == '') |
+          (_selectedGender == null) |
+          (_selectedstate == null) |
+          (_selectedtype == null) |
+          (_selectedcity == null) |
+          (_selectedcountry == null)) {
+        setState(() {
+          _msg = "You are required to fill all the fields";
+          _displayMsg = true;
+        });
+        return;
+      }
+
+      Person _person = new Person(
+          _firstNameController.text,
+          _lastNameController.text,
+          _mobileNumberController.text,
+          email,
+          'P',
+          _selectedGender,
+          _selectedcity,
+          _selectedcountry,
+          _selectedstate);
+      Patient _patient = new Patient(_selectedtype);
+      PatientController controller = new PatientController();
+      bool result =
+          await controller.addPatientRecord(_person, _patient, _image);
+      print(result);
+      if (result == true) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PatientViewDoctors()),
+        );
+      }
+    } else {
+      setState(() {
+        _msg = "You must agree to our terms of use & privacy policy";
+        _displayMsg = true;
+      });
     }
   }
 }

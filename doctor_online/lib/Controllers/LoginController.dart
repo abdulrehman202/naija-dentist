@@ -51,13 +51,11 @@ class LoginController {
 
   Future<void> sendEmailVerification(FirebaseUser user) async {
     print(user);
-    user.sendEmailVerification();
+    await user.sendEmailVerification();
   }
 
   Future<bool> isEmailVerified() async {
     user = await _firebaseAuth.currentUser();
     return user.isEmailVerified;
   }
-
-  
 }
