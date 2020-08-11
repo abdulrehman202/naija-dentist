@@ -88,11 +88,12 @@ class _set_appontment_ extends State<_set_appontment> {
                       Container(
                         margin: EdgeInsets.all(10.0),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
-                          child: Image.asset(
-                            'images/man_pic.jpg',
-                            height: 150.0,
-                            fit: BoxFit.fill,
+                          borderRadius: BorderRadius.circular(100.0),
+                          child: Image.network(
+                           obj.uploadedFileURL,
+                            height: 120.0,
+                            width: 120,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),

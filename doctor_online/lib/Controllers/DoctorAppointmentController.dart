@@ -83,7 +83,7 @@ class DoctorAppointmentController {
       for (DocumentSnapshot element in value.documents) {
         DoctorAppointments appointments = new DoctorAppointments();
         appointments.communication = element.data["communication"];
-        appointments.date = element.data["communication"];
+        appointments.date = element.data["date"];
         appointments.time = element.data["time"];
         DocumentSnapshot value01 = await Firestore.instance
             .collection("Person")

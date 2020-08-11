@@ -27,6 +27,11 @@ class SetAppointmentController {
         'communication': set.method,
         'rate': set.cost
       });
+      Firestore.instance
+          .collection('PatientAppointment').document(user.uid).collection("Doctors").document(doctorID).setData({
+            "doctorID":doctorID
+          });
+
       return true;
     } catch (e) {
       print(e);

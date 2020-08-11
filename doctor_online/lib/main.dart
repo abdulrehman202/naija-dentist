@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doctorapp/Chat_List.dart';
 import 'package:doctorapp/Register.dart';
 import 'package:doctorapp/SetupProfile.dart';
 import 'package:flutter/cupertino.dart';
@@ -217,9 +218,7 @@ class _Login extends State<Login> {
   Future<void> _functionSignUp() async {
     try {
       // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => PatientViewDoctors())
-      // );
+      //     context, MaterialPageRoute(builder: (context) => ChatList()));
 
       // Navigator.push(
       //   context,
@@ -235,6 +234,7 @@ class _Login extends State<Login> {
       // );
       // Navigator.push(context,
       //     MaterialPageRoute(builder: (context) => PatientViewDoctors()));
+
       if ((_email == null) | (_password == null)) {
         setState(() {
           _displayMsg=true;
