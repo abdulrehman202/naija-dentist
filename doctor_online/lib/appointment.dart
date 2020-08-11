@@ -101,7 +101,7 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          ChatList()
+                          ChatList(),
                   ),
                 );
               },

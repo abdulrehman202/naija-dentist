@@ -13,10 +13,7 @@ import 'LoginController.dart';
 
 class ChatController{
 
-
-
  final _firestore = Firestore.instance;
-  FirebaseUser user;
 
   ChatController()
   {
@@ -26,16 +23,24 @@ class ChatController{
   Future<void> sendMessage(String Message,String receiverUID,String type) async {
     LoginController controller = new LoginController();
     FirebaseUser user=await controller.getCurrentUser();
-    _firestore.collection('chat').document(user.uid).collection(receiverUID).add({
+    _firestore
+        .collection('chat')
+        .document(user.uid.toString())
+        .collection(receiverUID)
+        .add({
       'text': Message,
       'senderID': user.email,
-      'type': 'text',
+      'type': type,
     });
 
-    _firestore.collection('chat').document(receiverUID).collection(user.uid).add({
+    _firestore
+        .collection('chat')
+        .document(receiverUID)
+        .collection(user.uid)
+        .add({
       'text': Message,
       'senderID': user.email,
-       'type': type,
+      'type': type,
     });
     }
   Future<void> sendImage(File file,String receiverUID) async {
@@ -43,7 +48,7 @@ class ChatController{
    FirebaseUser user=await controller.getCurrentUser();
 
    StorageReference storageReference =
-   FirebaseStorage.instance.ref().child('${user.uid}/${receiverUID}');
+   FirebaseStorage.instance.ref().child('${user.uid}/${receiverUID}/${DateTime.now().toIso8601String()}');
    StorageUploadTask uploadTask = storageReference.putFile(file);
    await uploadTask.onComplete;
    sendMessage('${user.uid}/${receiverUID}/${DateTime.now().toIso8601String()}', user.uid,'image');
@@ -54,5 +59,15 @@ class ChatController{
 //   await uploadTask1.onComplete;
 //   sendMessage('${receiverUID}/${user.uid}/${DateTime.now().toIso8601String()}', receiverUID,'image');
      }
+  getMessages(String receiverUID)
+  async {
+    LoginController controller = new LoginController();
+    FirebaseUser user = await controller.getCurrentUser();
+    return _firestore
+        .collection('chat')
+        .document(user.uid)
+        .collection(receiverUID)
+        .snapshots();
+  }
   }
 

@@ -22,8 +22,11 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:doctorapp/src/pages/call.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'Classes/DoctorAppointments.dart';
+import 'Controllers/ChatController.dart';
+import 'Controllers/ChatController.dart';
 import 'Controllers/ChatController.dart';
 import 'Controllers/ChatController.dart';
 
@@ -31,6 +34,7 @@ var firstCamera;
 final _firestore = Firestore.instance;
 Future<FirebaseUser> user = (FirebaseAuth.instance.currentUser());
 DoctorAppointments apt;
+var channel_id;
 
 
 Future<void> main() async {
@@ -41,18 +45,35 @@ Future<void> main() async {
   runApp(ChatScreen(null));
 }
 
-String receiver;
+cam()
+async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final cameras = await availableCameras();
+  firstCamera = cameras.first;
+}
+
+Future<void> getUID()
+async {
+  LoginController controller = new LoginController();
+  FirebaseUser user=await controller.getCurrentUser();
+  uid = user.uid;
+}
+
+String receiver,uid;
 
 class ChatScreen extends StatelessWidget {
 
   ChatScreen(String rid)
   {
     receiver = rid;
+    getUID();
   }
 
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
+
+
 
       theme: ThemeData(
         fontFamily: 'Oxygen',
@@ -175,7 +196,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                           ),
                           color: myColors.bottomBarIcons,
                           onPressed: () async {
-                            print('camera');
+                            cam();
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -670,7 +691,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
         this.context,
         MaterialPageRoute(
           builder: (context) => CallPage(
-            channelName: user.email,
+            channelName: channel_id,
             role: _role,
           ),
         ),
@@ -881,12 +902,8 @@ class ImageBubble extends StatelessWidget{
 
 class MessageStream extends StatelessWidget{
 
-  var uid;
-
   MessageStream()
-  {
-    uid = getUID();
-  }
+  {}
 
   @override
   Widget build(BuildContext context) {
@@ -894,9 +911,10 @@ class MessageStream extends StatelessWidget{
     // TODO: implement build
     return StreamBuilder<QuerySnapshot>(
 
-      stream: _firestore.collection('chat')
+      stream: Firestore.instance
+          .collection('chat')
           .document(uid.toString())
-          .collection(receiver)
+          .collection(receiver.toString())
           .snapshots(),
       builder: (context,snapshot){
         if(snapshot.hasData)
@@ -910,16 +928,35 @@ class MessageStream extends StatelessWidget{
             final msgType = message.data['type'];
 
             var msgBubble;
-            
+
+            print('User id: ${uid.toString()}');
+            print('Receiver id: ${receiver.toString()}');
+            print(msgType.toString());
+
             if(msgType == 'image')
             {
-              var url = getImageURL();
               msgBubble = ImageBubble(imagePath: msgText,Sender: msgSender,isMe: msgSender == getUEmail().toString());
             }
 
-
             else if(msgType == 'text')
             {
+              msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == getUEmail().toString());
+            }
+
+            else if(msgType == 'videocall')
+            {
+              Fluttertoast.showToast(
+                  msg: "You have an incoming video call. Tap on video icon at top to join",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0
+              );
+            channel_id = msgText;
+            }
+
+            else{
               msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == getUEmail().toString());
             }
 
@@ -948,21 +985,5 @@ class MessageStream extends StatelessWidget{
 
     return user.email;
   }
-
-  Future<String> getUID()
-  async {
-    LoginController controller = new LoginController();
-    FirebaseUser user=await controller.getCurrentUser();
-
-    return user.uid;
-  }
-  
-  Future<dynamic> getImageURL()
-  async {
-    final ref = FirebaseStorage.instance.ref().child('${uid.toString()}/${receiver}');
-    var url = await ref.getDownloadURL();
-    return url;
-  }
-
 }
 
