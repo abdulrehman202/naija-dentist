@@ -1,38 +1,54 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doctorapp/Classes/Doctor.dart';
 import 'package:doctorapp/Classes/Person.dart';
 import 'package:doctorapp/Classes/Patient.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'LoginController.dart';
 
 
 class ChatController{
 
-  var _firebaseDatabase;
+
+
+ final _firestore = Firestore.instance;
   FirebaseUser user;
 
-  ChatController() {
-    _firebaseDatabase = FirebaseDatabase.instance.reference();
+  ChatController()
+  {
+//    user = LoginController().getCurrentUser();
   }
 
-  Future<Null> sendMessage(int Sid,int Rid,String Message)
-  async {
-
-    DatabaseReference dbRef = _firebaseDatabase.reference();
+  Future<void> sendMessage(String Message,String receiverUID) async {
     LoginController controller = new LoginController();
-    FirebaseUser user = await controller.getCurrentUser();
-    dbRef.child('Chat').push().set({
-      "id": 2,
-      "receiverId": Rid,
-      "senderId": Sid,
-      "message": Message,
-      "time": DateTime.now().hour.toString()+":"+DateTime.now().minute.toString(),
+    FirebaseUser user=await controller.getCurrentUser();
+    _firestore.collection('chat').document(user.uid).collection(receiverUID).add({
+      'text': Message,
+      'senderID': user.email,
     });
 
+    _firestore.collection('chat').document(receiverUID).collection(user.uid).add({
+      'text': Message,
+      'senderID': user.email,
+    });
+    }
+  Future<void> sendImage(File file,String receiverUID) async {
+   LoginController controller = new LoginController();
+   FirebaseUser user=await controller.getCurrentUser();
 
+   StorageReference storageReference =
+   FirebaseStorage.instance.ref().child('${user.uid}/${receiverUID}');
+   StorageUploadTask uploadTask = storageReference.putFile(file);
+   await uploadTask.onComplete;
+
+   StorageReference storageReference1 =
+   FirebaseStorage.instance.ref().child('${receiverUID}/${user.uid}');
+   StorageUploadTask uploadTask1 = storageReference1.putFile(file);
+   await uploadTask1.onComplete;
+     }
   }
-
-
-}
 

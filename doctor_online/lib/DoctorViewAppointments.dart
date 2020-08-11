@@ -2,6 +2,7 @@ import 'package:doctorapp/Chat_List.dart';
 import 'package:doctorapp/Chat_Screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'Chat_Screen.dart';
 import 'Classes/DoctorAppointments.dart';
 import 'package:chips_choice/chips_choice.dart';
 
@@ -79,7 +80,7 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
-        '/startChat': (BuildContext context) => new ChatScreen(),
+//        '/startChat': (BuildContext context) => new ChatScreen(),
       },
       theme: ThemeData(
         primaryColor: Color(0xFF4E45FF),
@@ -301,14 +302,14 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                                     ),
                                                     onPressed: () {
                                                       print(index);
-                                                      // Navigator.push(
-                                                      //   context,
-                                                      //   MaterialPageRoute(
-                                                      //       builder: (context) =>
-                                                      //           ChatList(
-                                                      //               apt.elementAt(
-                                                      //                   index))),
-                                                      // );
+                                                       Navigator.push(
+                                                         context,
+                                                         MaterialPageRoute(
+                                                             builder: (context) =>
+                                                                 ChatScreen(
+                                                                     apt.elementAt(
+                                                                         index).patientId)),
+                                                       );
                                                     },
                                                   ),
                                                 ),
