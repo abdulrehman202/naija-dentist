@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:doctorapp/appointment_class.dart';
 import 'Controllers/ShowDoctorController.dart';
 import 'appointment_class.dart';
+import 'Chat_List.dart';
 
 class PatientViewDoctors extends StatelessWidget {
   //String email;
@@ -90,6 +91,22 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
               fontFamily: 'Oxygen',
             ),
           ),
+          actions: <Widget>
+          [
+            IconButton(
+              icon: Icon(Icons.message),
+              onPressed: ()
+              {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ChatList()
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         body: Column(
           children: <Widget>[

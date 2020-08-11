@@ -686,7 +686,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
   void sendMessage(String text)
   {
     ChatController chatController = new ChatController();
-    chatController.sendMessage(text,receiver);
+    chatController.sendMessage(text,receiver,'text');
   }
 }
 
@@ -790,7 +790,7 @@ class DisplayPictureScreen extends StatelessWidget {
             onPressed: ()
             {
               ChatController().sendImage(file, receiver);
-              ChatController().sendMessage('<ImageFile>', receiver);
+//              ChatController().sendMessage(imagePath, receiver,'image');
             },
           )
         ],
@@ -843,9 +843,9 @@ class MessageBubble extends StatelessWidget{
 }
 class ImageBubble extends StatelessWidget{
 
-  ImageBubble({this.image,this.Sender, this.isMe});
+  ImageBubble({this.imagePath,this.Sender, this.isMe});
 
-  var Sender,image;
+  var Sender,imagePath;
   final bool isMe;
 
   @override
@@ -869,7 +869,7 @@ class ImageBubble extends StatelessWidget{
               color: isMe ? Colors.lightBlueAccent : Colors.white,
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 10.0,horizontal: 20.0),
-                child: Image.network(image),
+                child: Image.network(imagePath),
               ),
 
             ),
@@ -907,16 +907,22 @@ class MessageStream extends StatelessWidget{
           {
             final msgText = message.data['text'];
             final msgSender = message.data['senderID'];
-            
+            final msgType = message.data['type'];
+
             var msgBubble;
             
-            if(msgText == '<ImageFile>')
+            if(msgType == 'image')
             {
               var url = getImageURL();
-              msgBubble = ImageBubble(image: url,Sender: msgSender,isMe: msgSender == getUEmail().toString());
+              msgBubble = ImageBubble(imagePath: msgText,Sender: msgSender,isMe: msgSender == getUEmail().toString());
             }
-            
-            else msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == getUEmail().toString());
+
+
+            else if(msgType == 'text')
+            {
+              msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == getUEmail().toString());
+            }
+
             messageWidgets.add(msgBubble);
           }
           return Expanded(

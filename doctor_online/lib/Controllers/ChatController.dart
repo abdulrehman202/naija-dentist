@@ -23,17 +23,19 @@ class ChatController{
 //    user = LoginController().getCurrentUser();
   }
 
-  Future<void> sendMessage(String Message,String receiverUID) async {
+  Future<void> sendMessage(String Message,String receiverUID,String type) async {
     LoginController controller = new LoginController();
     FirebaseUser user=await controller.getCurrentUser();
     _firestore.collection('chat').document(user.uid).collection(receiverUID).add({
       'text': Message,
       'senderID': user.email,
+      'type': 'text',
     });
 
     _firestore.collection('chat').document(receiverUID).collection(user.uid).add({
       'text': Message,
       'senderID': user.email,
+       'type': type,
     });
     }
   Future<void> sendImage(File file,String receiverUID) async {
@@ -44,11 +46,13 @@ class ChatController{
    FirebaseStorage.instance.ref().child('${user.uid}/${receiverUID}');
    StorageUploadTask uploadTask = storageReference.putFile(file);
    await uploadTask.onComplete;
+   sendMessage('${user.uid}/${receiverUID}/${DateTime.now().toIso8601String()}', user.uid,'image');
 
-   StorageReference storageReference1 =
-   FirebaseStorage.instance.ref().child('${receiverUID}/${user.uid}');
-   StorageUploadTask uploadTask1 = storageReference1.putFile(file);
-   await uploadTask1.onComplete;
+//   StorageReference storageReference1 =
+//   FirebaseStorage.instance.ref().child('${receiverUID}/${user.uid}');
+//   StorageUploadTask uploadTask1 = storageReference1.putFile(file);
+//   await uploadTask1.onComplete;
+//   sendMessage('${receiverUID}/${user.uid}/${DateTime.now().toIso8601String()}', receiverUID,'image');
      }
   }
 

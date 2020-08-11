@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'Classes/SetAppointment.dart';
 import 'Controllers/SetAppointmentController.dart';
+import 'Chat_List.dart';
 
 class set_appointment extends StatelessWidget {
   appointment_class obj;
@@ -70,7 +71,24 @@ class _set_appontment_ extends State<_set_appontment> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Book your Appointment'),
+        actions: <Widget>
+        [
+        IconButton(
+          icon: Icon(Icons.message),
+          onPressed: ()
+          {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ChatList()
+              ),
+            );
+          },
+        ),
+        ],
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
