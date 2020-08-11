@@ -301,14 +301,14 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                                     ),
                                                     onPressed: () {
                                                       print(index);
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                ChatList(
-                                                                    apt.elementAt(
-                                                                        index))),
-                                                      );
+                                                      // Navigator.push(
+                                                      //   context,
+                                                      //   MaterialPageRoute(
+                                                      //       builder: (context) =>
+                                                      //           ChatList(
+                                                      //               apt.elementAt(
+                                                      //                   index))),
+                                                      // );
                                                     },
                                                   ),
                                                 ),

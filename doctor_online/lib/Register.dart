@@ -268,16 +268,20 @@ class SignUp extends State<_SignUp> {
             if (user.toString().compareTo(' ') != 0) {
               print('successful');
               if (_selectedtype == 'Patient') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>VerificationScreen_('P',_email)),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) =>VerificationScreen_('P',_email)),
+                // );
+                Navigator.push(context,
+              MaterialPageRoute(builder: (context) => SetupProfile(_email)));
               } else if (_selectedtype == 'Doctor') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => VerificationScreen_('D',_email)),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (context) => VerificationScreen_('D',_email)),
+                // );
+                Navigator.push(context,
+              MaterialPageRoute(builder: (context) => DentistSetupProfile(_email)));
               }
             } else {
               print('unsuccessful');
