@@ -2,6 +2,7 @@ import 'package:doctorapp/Chat_List.dart';
 import 'package:doctorapp/Chat_Screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'Chat_Screen.dart';
 import 'Classes/DoctorAppointments.dart';
 import 'package:chips_choice/chips_choice.dart';
 
@@ -79,7 +80,7 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
-        '/startChat': (BuildContext context) => new ChatScreen(),
+//        '/startChat': (BuildContext context) => new ChatScreen(),
       },
       theme: ThemeData(
         primaryColor: Color(0xFF4E45FF),
@@ -190,7 +191,7 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                 return InkWell(
                                   child: Container(
                                     constraints: BoxConstraints(
-                                      minWidth: 350,
+                                      minWidth: 150,
                                       maxWidth:
                                           MediaQuery.of(context).size.width -
                                               40,
@@ -201,20 +202,20 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                         children: <Widget>[
                                           temp_apt.uploadedFileURL != null
                                               ? Container(
-                                                  width: 150,
-                                                  height: 150,
+                                                  width: 80,
+                                                  height: 80,
                                                   padding: EdgeInsets.all(10),
                                                   child: ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            20.0),
+                                                            80.0),
                                                     child: Image.network(
                                                       temp_apt.uploadedFileURL,
                                                       width:
                                                           MediaQuery.of(context)
                                                               .size
                                                               .width,
-                                                      height: 200.0,
+                                                      height: 80,
                                                       fit: BoxFit.fill,
                                                     ),
                                                   ),
@@ -301,14 +302,15 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                                     ),
                                                     onPressed: () {
                                                       print(index);
-                                                      // Navigator.push(
-                                                      //   context,
-                                                      //   MaterialPageRoute(
-                                                      //       builder: (context) =>
-                                                      //           ChatList(
-                                                      //               apt.elementAt(
-                                                      //                   index))),
-                                                      // );
+                                                      print(temp_apt.patientId);
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                ChatScreen(temp_apt
+                                                                    .patientId
+                                                                    .toString())),
+                                                      );
                                                     },
                                                   ),
                                                 ),

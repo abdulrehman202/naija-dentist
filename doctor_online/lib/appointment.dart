@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:doctorapp/appointment_class.dart';
 import 'Controllers/ShowDoctorController.dart';
 import 'appointment_class.dart';
+import 'Chat_List.dart';
 
 class PatientViewDoctors extends StatelessWidget {
   //String email;
@@ -90,6 +91,22 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
               fontFamily: 'Oxygen',
             ),
           ),
+          actions: <Widget>
+          [
+            IconButton(
+              icon: Icon(Icons.message),
+              onPressed: ()
+              {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ChatList(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         body: Column(
           children: <Widget>[
@@ -135,10 +152,10 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                 return InkWell(
                                   child: Container(
                                       constraints: BoxConstraints(
-                                        minWidth: 350,
+                                        minWidth: 150,
                                         maxWidth:
                                             MediaQuery.of(context).size.width -
-                                                40,
+                                                60,
                                       ),
                                       margin:
                                           EdgeInsets.fromLTRB(10, 10, 10, 0),
@@ -148,20 +165,20 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                             Row(
                                               children: <Widget>[
                                                 Container(
-                                                  width: 150,
-                                                  height: 150,
+                                                  width: 80,
+                                                  height: 80,
                                                   padding: EdgeInsets.all(10),
                                                   child: ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            20.0),
+                                                            80.0),
                                                     child: Image.network(
                                                       temp_apt.uploadedFileURL,
                                                       width:
                                                           MediaQuery.of(context)
                                                               .size
                                                               .width,
-                                                      height: 200.0,
+                                                      height: 80,
                                                       fit: BoxFit.fill,
                                                     ),
                                                   ),

@@ -50,6 +50,8 @@ class DoctorAppointmentController {
           if (value03.data != null) {
             appointments.age = value03.data["age"];
           }
+
+          appointments.patientId=element["patientID"];
           StorageReference storageReference = FirebaseStorage.instance
               .ref()
               .child('${element["patientID"]}/profile');
@@ -100,6 +102,7 @@ class DoctorAppointmentController {
         if (value03.data != null) {
           appointments.age = value03.data["age"];
         }
+        appointments.patientId=element["patientID"];
         StorageReference storageReference = FirebaseStorage.instance
             .ref()
             .child('${element["patientID"]}/profile');

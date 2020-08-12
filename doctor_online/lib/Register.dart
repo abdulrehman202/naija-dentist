@@ -23,6 +23,7 @@ class _SignUp extends StatefulWidget {
 class SignUp extends State<_SignUp> {
   List<String> _type = ['Doctor', 'Patient'];
   String _selectedtype;
+  bool _progressVisible = false;
   BuildContext _context;
   final _typeController = TextEditingController();
   String _email;
@@ -189,11 +190,21 @@ class SignUp extends State<_SignUp> {
                     ],
                   ),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                Visibility(
+                  visible: _progressVisible,
+                  child: CircularProgressIndicator(),
+                ),
                 Container(
                     width: 250,
                     padding: EdgeInsets.all(20.0),
                     child: RaisedButton(
                       onPressed: () {
+                        setState(() {
+                          _progressVisible = true;
+                        });
                         _functionSignUp();
                       },
                       color: Color(0xff4e45ff),
@@ -250,43 +261,58 @@ class SignUp extends State<_SignUp> {
       if ((_email == null) | (_password == null)) {
         setState(() {
           _displayMsg = true;
+          _progressVisible = false;
           _msg = "Incomplete Fields";
-          return;
         });
+        return;
       }
       _email = _email.replaceAll(new RegExp(r"\s+"), "");
       _password = _password.trim();
       _validateInputs();
       if (_autoValidate == false) {
         if (_checkBoxVal) {
-          print('Yes');
           if (_selectedtype != 'Account Type') {
             LoginController loginController = new LoginController();
-            print('come');
+            _email = _email.toLowerCase();
             Future<String> user =
                 loginController.CreateNewUser(_email, _password);
+            setState(() {
+              _progressVisible = false;
+              _displayMsg = false;
+            });
             if (user.toString().compareTo(' ') != 0) {
               print('successful');
+
               if (_selectedtype == 'Patient') {
                 // Navigator.push(
                 //   context,
                 //   MaterialPageRoute(builder: (context) =>VerificationScreen_('P',_email)),
                 // );
-                Navigator.push(context,
-              MaterialPageRoute(builder: (context) => SetupProfile(_email)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SetupProfile(_email)));
               } else if (_selectedtype == 'Doctor') {
                 // Navigator.push(
                 //   context,
                 //   MaterialPageRoute(
                 //       builder: (context) => VerificationScreen_('D',_email)),
                 // );
-                Navigator.push(context,
-              MaterialPageRoute(builder: (context) => DentistSetupProfile(_email)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DentistSetupProfile(_email)));
               }
             } else {
               print('unsuccessful');
             }
           }
+        } else {
+          setState(() {
+            _msg = "You must agree to our terms of use & privacy policy";
+            _displayMsg = true;
+            _progressVisible = false;
+          });
         }
       }
     } catch (e) {

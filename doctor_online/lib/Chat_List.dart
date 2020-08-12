@@ -7,6 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctorapp/main.dart';
 
+import 'Chat_Screen.dart';
+
 class ChatList extends StatelessWidget {
   // DoctorAppointments obj;
   // ChatList(this.obj);
@@ -277,6 +279,13 @@ Timer t;
                                   ),
                                   onTap: () {
                                     print(title.patientId);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              ChatScreen(
+                                                  title.patientId)),
+                                    );
                                     //t.cancel();
                                   },
                                 );

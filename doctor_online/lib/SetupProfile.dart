@@ -41,6 +41,8 @@ class _SetupProfile extends State<_SetupProfile_> {
   bool _displayMsg = false;
 
   var _msg = "Select profile Image";
+
+  bool _progressVisible = false;
   _SetupProfile(this.email);
 
   String _selectedGender;
@@ -175,31 +177,32 @@ class _SetupProfile extends State<_SetupProfile_> {
                           hintText: 'Mobile Number',
                         ))),
                 Container(
+                  child: DropdownButton(
+                    hint: Text('Select Country'),
+                    value: _selectedcountry,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedcountry = newValue;
+                      });
+                    },
+                    items: _country.map((country) {
+                      return DropdownMenuItem(
+                        child: new Text(country),
+                        value: country,
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Container(
                   constraints: BoxConstraints(
                     minWidth: 300,
-                    maxWidth: MediaQuery.of(context).size.width - 10,
+                    maxWidth: MediaQuery.of(context).size.width - 20,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Container(
-                        child: DropdownButton(
-                          hint: Text('Select Country'),
-                          value: _selectedcountry,
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedcountry = newValue;
-                            });
-                          },
-                          items: _country.map((country) {
-                            return DropdownMenuItem(
-                              child: new Text(country),
-                              value: country,
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      Container(
+                        margin: EdgeInsets.only(right: 20),
                         child: DropdownButton(
                           hint: Text('Select City'),
                           value: _selectedcity,
@@ -217,6 +220,7 @@ class _SetupProfile extends State<_SetupProfile_> {
                         ),
                       ),
                       Container(
+                        margin: EdgeInsets.only(left: 20),
                         child: DropdownButton(
                           hint: Text('Select State'),
                           value: _selectedstate,
@@ -284,7 +288,8 @@ class _SetupProfile extends State<_SetupProfile_> {
                         _image != null
                             ? Image.asset(
                                 _image.path,
-                                height: 150,
+                                width: 100,
+                                height: 100,
                               )
                             : Container(height: 80),
                         Column(
@@ -304,21 +309,28 @@ class _SetupProfile extends State<_SetupProfile_> {
                                   )
                                 : Container(),
                             _image != null
-                                ? RaisedButton.icon(
-                                    icon: Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                    ),
-                                    label: Text(
-                                      'Clear Selection',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.normal,
+                                ? Row(
+                                    children: <Widget>[
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      RaisedButton.icon(
+                                        icon: Icon(
+                                          Icons.close,
                                           color: Colors.white,
-                                          fontFamily: 'Oxygen'),
-                                    ),
-                                    color: Colors.red[400],
-                                    onPressed: clearSelection,
+                                        ),
+                                        label: Text(
+                                          'Remove',
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.normal,
+                                              color: Colors.white,
+                                              fontFamily: 'Oxygen'),
+                                        ),
+                                        color: Colors.red[400],
+                                        onPressed: clearSelection,
+                                      ),
+                                    ],
                                   )
                                 : Container(),
                           ],
@@ -356,11 +368,21 @@ class _SetupProfile extends State<_SetupProfile_> {
                     ],
                   ),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                Visibility(
+                  visible: _progressVisible,
+                  child: CircularProgressIndicator(),
+                ),
                 Container(
                     width: 250,
                     padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                     child: RaisedButton(
                       onPressed: () {
+                        setState(() {
+                          _progressVisible = true;
+                        });
                         SavePatientData();
                       },
                       color: Color(0xff4e45ff),
@@ -450,6 +472,7 @@ class _SetupProfile extends State<_SetupProfile_> {
         setState(() {
           _msg = "Please upload the profile pic";
           _displayMsg = true;
+          _progressVisible = false;
         });
         return;
       }
@@ -465,6 +488,7 @@ class _SetupProfile extends State<_SetupProfile_> {
         setState(() {
           _msg = "You are required to fill all the fields";
           _displayMsg = true;
+          _progressVisible = false;
         });
         return;
       }
@@ -484,6 +508,10 @@ class _SetupProfile extends State<_SetupProfile_> {
       bool result =
           await controller.addPatientRecord(_person, _patient, _image);
       print(result);
+      setState(() {
+        _progressVisible = false;
+        _displayMsg = false;
+      });
       if (result == true) {
         Navigator.push(
           context,
@@ -494,6 +522,7 @@ class _SetupProfile extends State<_SetupProfile_> {
       setState(() {
         _msg = "You must agree to our terms of use & privacy policy";
         _displayMsg = true;
+        _progressVisible = false;
       });
     }
   }
