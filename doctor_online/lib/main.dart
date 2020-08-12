@@ -243,8 +243,10 @@ class _Login extends State<Login> {
         });
       }
       _email = _email.replaceAll(new RegExp(r"\s+"), "");
+
       _password = _password.trim();
       _validateInputs();
+      _email = _email.toLowerCase();
       if (_autoValidate == false) {
         LoginController loginController = new LoginController();
         String user = await loginController.CheckSignIn(_email, _password);

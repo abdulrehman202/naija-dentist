@@ -191,9 +191,9 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                 return InkWell(
                                   child: Container(
                                     constraints: BoxConstraints(
-                                      minWidth: 350,
+                                      minWidth: 150,
                                       maxWidth:
-                                          MediaQuery.of(context).size.width -
+                                      MediaQuery.of(context).size.width -
                                               40,
                                     ),
                                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
@@ -202,20 +202,20 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                         children: <Widget>[
                                           temp_apt.uploadedFileURL != null
                                               ? Container(
-                                                  width: 150,
-                                                  height: 150,
+                                                  width: 80,
+                                                  height: 80,
                                                   padding: EdgeInsets.all(10),
                                                   child: ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            20.0),
+                                                            80.0),
                                                     child: Image.network(
                                                       temp_apt.uploadedFileURL,
                                                       width:
                                                           MediaQuery.of(context)
                                                               .size
                                                               .width,
-                                                      height: 200.0,
+                                                      height: 80.0,
                                                       fit: BoxFit.fill,
                                                     ),
                                                   ),
@@ -308,7 +308,7 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                                              builder: (context) =>
                                                                  ChatScreen(
                                                                      apt.elementAt(
-                                                                         index).patientId)),
+                                                                         index).patientId.toString(),apt.elementAt(index).name,apt.elementAt(index).uploadedFileURL)),
                                                        );
                                                     },
                                                   ),

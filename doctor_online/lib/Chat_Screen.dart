@@ -4,7 +4,6 @@ import 'package:camera/camera.dart';
 import 'package:doctorapp/Controllers/LoginController.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:doctorapp/main.dart';
@@ -20,9 +19,9 @@ import 'dart:async';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:doctorapp/src/pages/call.dart';
+import 'package:doctorapp/src/pages/video_call.dart';
+import 'package:doctorapp/src/pages/audio_call.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import 'Classes/DoctorAppointments.dart';
 import 'Controllers/ChatController.dart';
@@ -42,7 +41,6 @@ Future<void> main() async {
   final cameras = await availableCameras();
   firstCamera = cameras.first;
 
-  runApp(ChatScreen(null));
 }
 
 cam()
@@ -59,14 +57,25 @@ async {
   uid = user.uid;
 }
 
-String receiver,uid;
+Future<void> getUEmail()
+async {
+  LoginController controller = new LoginController();
+  FirebaseUser user=await controller.getCurrentUser();
+  uemail = user.email;
+}
+
+String receiver,uid,uemail,receiver_name,receiver_pic;
 
 class ChatScreen extends StatelessWidget {
 
-  ChatScreen(String rid)
+  ChatScreen(String rid,String name,String picURL)
   {
     receiver = rid;
     getUID();
+    getUEmail();
+    receiver_name = name;
+    receiver_pic = picURL;
+    channel_id = '${uid} ${receiver}';
   }
 
   @override
@@ -311,8 +320,8 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                   GestureDetector(
                     child: ClipOval(
                       //borderRadius: BorderRadius.circular(100.0),
-                      child: Image.asset(
-                        'images/man_pic.jpg',
+                      child: Image.network(
+                        receiver_pic,
                         width: 40,
                         height: 40,
                         fit: BoxFit.fitWidth,
@@ -322,7 +331,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                   Container(
                     margin: EdgeInsets.fromLTRB(13, 0, 0, 0),
                     child: Text(
-                      'Linda',
+                      receiver_name,
                       style: TextStyle(
                         fontFamily: 'Oxygen',
                         fontSize: 19,
@@ -342,7 +351,15 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                     size: 24,
                   ),
                   color: myColors.appBarIcons,
-                  onPressed: () {},
+                  onPressed: ()
+                  {
+                    MaterialPageRoute(
+                        builder: (context) => VoiceCallPage(),
+                    );
+
+                    ChatController().sendMessage(channel_id, receiver, 'voicecall');
+
+                  },
                 ),
                 IconButton(
                   icon: Icon(
@@ -586,89 +603,6 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
 
                           ),
                         ),
-//                        Row(
-//                          children: <Widget>[
-//                            SizedBox(
-//                              width: 15,
-//                            ),
-//                            ClipRRect(
-//                                borderRadius: BorderRadius.circular(3.0),
-//                                child: Image.asset('images/man_pic.jpg')),
-//                            SizedBox(
-//                              width: 15,
-//                            ),
-//                            Container(
-//                              constraints: BoxConstraints(
-//                                  minWidth: 75, maxWidth: widthD - 175),
-//                              padding: EdgeInsets.fromLTRB(20, 10, 10, 10),
-//                              margin: EdgeInsets.symmetric(vertical: 10),
-//                              decoration: BoxDecoration(
-//                                color: Color(0xfff5f5f5),
-//                                borderRadius: BorderRadius.circular(15.0),
-//                                boxShadow: [
-//                                  BoxShadow(
-//                                    color: Colors.grey.withOpacity(0.5),
-//                                    spreadRadius: 2,
-//                                    blurRadius: 5,
-//                                  ),
-//                                ],
-//                              ),
-//                              child: Text(
-//                                'Hello!fdddddddddddddddddddddddddddddddddddddddddd',
-//                                maxLines: null,
-//                                overflow: TextOverflow.clip,
-//                                textAlign: TextAlign.justify,
-//                                style: TextStyle(
-//                                  fontFamily: 'Oxygen',
-//                                  fontSize: 16,
-//                                  color: const Color(0xff707070),
-//                                ),
-//                              ),
-//                            ),
-//                          ],
-//                        ),
-//                        Row(
-//                          mainAxisAlignment: MainAxisAlignment.end,
-//                          children: <Widget>[
-//                            Container(
-//                              constraints: BoxConstraints(
-//                                  minWidth: 100, maxWidth: widthD - 175),
-//                              padding: EdgeInsets.fromLTRB(20, 10, 10, 10),
-//                              margin: EdgeInsets.symmetric(vertical: 3),
-//                              decoration: BoxDecoration(
-//                                color: myColors.appBar,
-//                                borderRadius: BorderRadius.circular(15.0),
-//                                boxShadow: [
-//                                  BoxShadow(
-//                                    color: Colors.grey.withOpacity(0.5),
-//                                    spreadRadius: 2,
-//                                    blurRadius: 5,
-//                                  ),
-//                                ],
-//                              ),
-//                              child: Text(
-//                                'Hello!',
-//                                maxLines: null,
-//                                overflow: TextOverflow.clip,
-//                                textAlign: TextAlign.justify,
-//                                style: TextStyle(
-//                                  fontFamily: 'Oxygen',
-//                                  fontSize: 16,
-//                                  color: const Color(0xffffffff),
-//                                ),
-//                              ),
-//                            ),
-//                            SizedBox(
-//                              width: 15,
-//                            ),
-//                            ClipRRect(
-//                                borderRadius: BorderRadius.circular(3.0),
-//                                child: Image.asset('images/man_pic.jpg')),
-//                            SizedBox(
-//                              width: 15,
-//                            ),
-//                          ],
-//                        ),
                       ],
                     ),
 
@@ -678,8 +612,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
   }
 
   Future<void> onJoin() async {
-    LoginController controller = new LoginController();
-    FirebaseUser user=await controller.getCurrentUser();
+    ChatController().sendMessage(channel_id, receiver, 'videocall');
     // update input validation
     setState(() {
     });
@@ -902,8 +835,9 @@ class ImageBubble extends StatelessWidget{
 
 class MessageStream extends StatelessWidget{
 
-  MessageStream()
-  {}
+  ClientRole _role = ClientRole.Broadcaster;
+
+  MessageStream();
 
   @override
   Widget build(BuildContext context) {
@@ -915,11 +849,12 @@ class MessageStream extends StatelessWidget{
           .collection('chat')
           .document(uid.toString())
           .collection(receiver.toString())
+//          .orderBy('time',descending: true)
           .snapshots(),
       builder: (context,snapshot){
         if(snapshot.hasData)
         {
-          final messages = snapshot.data.documents;
+          final messages = snapshot.data.documents.reversed;
           List<MessageBubble> messageWidgets = [];
           for(var message in  messages)
           {
@@ -931,33 +866,226 @@ class MessageStream extends StatelessWidget{
 
             print('User id: ${uid.toString()}');
             print('Receiver id: ${receiver.toString()}');
-            print(msgType.toString());
+            print('User Email: ${uemail.toString()}');
 
             if(msgType == 'image')
             {
-              msgBubble = ImageBubble(imagePath: msgText,Sender: msgSender,isMe: msgSender == getUEmail().toString());
+              msgBubble = ImageBubble(imagePath: msgText,Sender: msgSender,isMe: msgSender == uemail.toString());
             }
 
             else if(msgType == 'text')
             {
-              msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == getUEmail().toString());
+              msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == uemail.toString());
             }
 
             else if(msgType == 'videocall')
             {
-              Fluttertoast.showToast(
-                  msg: "You have an incoming video call. Tap on video icon at top to join",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
-                  timeInSecForIosWeb: 1,
-                  textColor: Colors.white,
-                  fontSize: 16.0
-              );
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      content: SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            GestureDetector(
+                              child: ClipOval(
+                                //borderRadius: BorderRadius.circular(100.0),
+                                child: Image.network(
+                                  receiver_pic,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.fitWidth,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.fromLTRB(13, 0, 0, 0),
+                              child: Text(
+                                receiver_name,
+                                style: TextStyle(
+                                  fontFamily: 'Oxygen',
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                FlatButton(
+                                  padding: EdgeInsets.only(right: 10),
+                                  onPressed:  ()
+                                  async {
+                                    // update input validation
+
+
+                                    // await for camera and mic permissions before pushing video page
+                                    await _handleCameraAndMic();
+                                    // push video page with given channel name
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CallPage(
+                                          channelName: channel_id,
+                                          role: _role,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 143.0,
+                                    height: 41.0,
+                                    margin: EdgeInsets.only(top: 10),
+                                    padding: EdgeInsets.only(top: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: const Color(0xff26B14D),
+                                    ),
+                                    child: Text(
+                                      'Confirm',
+                                      style: TextStyle(
+                                        fontFamily: 'Josefin Sans',
+                                        fontSize: 22,
+                                        color: const Color(0xffffffff),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                                FlatButton(
+                                  padding: EdgeInsets.only(right: 0),
+                                  onPressed: null,
+                                  child: Container(
+                                    width: 143.0,
+                                    height: 41.0,
+                                    margin: EdgeInsets.only(top: 10),
+                                    padding: EdgeInsets.only(top: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: const Color(0xffDD4F43),
+                                    ),
+                                    child: Text(
+                                      'Reject',
+                                      style: TextStyle(
+                                        fontFamily: 'Josefin Sans',
+                                        fontSize: 22,
+                                        color: const Color(0xffffffff),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  });
             channel_id = msgText;
             }
 
-            else{
-              msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == getUEmail().toString());
+            else if(msgType == 'voicecall')
+            {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      content: SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            GestureDetector(
+                              child: ClipOval(
+                                //borderRadius: BorderRadius.circular(100.0),
+                                child: Image.network(
+                                  receiver_pic,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.fitWidth,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.fromLTRB(13, 0, 0, 0),
+                              child: Text(
+                                receiver_name,
+                                style: TextStyle(
+                                  fontFamily: 'Oxygen',
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                FlatButton(
+                                  padding: EdgeInsets.only(right: 10),
+                                  onPressed:  ()
+                                  {
+                                    MaterialPageRoute(
+                                      builder: (context) => VoiceCallPage(),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 143.0,
+                                    height: 41.0,
+                                    margin: EdgeInsets.only(top: 10),
+                                    padding: EdgeInsets.only(top: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: const Color(0xff26B14D),
+                                    ),
+                                    child: Text(
+                                      'Confirm',
+                                      style: TextStyle(
+                                        fontFamily: 'Josefin Sans',
+                                        fontSize: 22,
+                                        color: const Color(0xffffffff),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                                FlatButton(
+                                  padding: EdgeInsets.only(right: 0),
+                                  onPressed: null,
+                                  child: Container(
+                                    width: 143.0,
+                                    height: 41.0,
+                                    margin: EdgeInsets.only(top: 10),
+                                    padding: EdgeInsets.only(top: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: const Color(0xffDD4F43),
+                                    ),
+                                    child: Text(
+                                      'Reject',
+                                      style: TextStyle(
+                                        fontFamily: 'Josefin Sans',
+                                        fontSize: 22,
+                                        color: const Color(0xffffffff),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  });
+              channel_id = msgText;
             }
 
             messageWidgets.add(msgBubble);
@@ -966,7 +1094,8 @@ class MessageStream extends StatelessWidget{
             child : ListView(
               reverse: true,
               children:  messageWidgets,
-            ),);
+            ),
+          );
         }
         else
         {
@@ -978,12 +1107,219 @@ class MessageStream extends StatelessWidget{
     );
   }
 
-  Future<String> getUEmail()
-  async {
-   LoginController controller = new LoginController();
-    FirebaseUser user=await controller.getCurrentUser();
+  Future<void> _handleCameraAndMic() async {
+    await PermissionHandler().requestPermissions(
+      [PermissionGroup.camera, PermissionGroup.microphone],
+    );
+  }
 
-    return user.email;
+
+}
+
+class VoiceCallPage extends StatefulWidget {
+  @override
+  _VoiceCallPageState createState() => _VoiceCallPageState();
+}
+
+class _VoiceCallPageState extends State<VoiceCallPage> {
+  Timer _timmerInstance;
+  int _start = 0;
+  String _timmer = '';
+
+
+  void startTimmer() {
+    var oneSec = Duration(seconds: 1);
+    _timmerInstance = Timer.periodic(
+        oneSec,
+            (Timer timer) => setState(() {
+          if (_start < 0) {
+            _timmerInstance.cancel();
+          } else {
+            _start = _start + 1;
+            _timmer = getTimerTime(_start);
+          }
+        }));
+  }
+
+
+  String getTimerTime(int start) {
+    int minutes = (start ~/ 60);
+    String sMinute = '';
+    if (minutes.toString().length == 1) {
+      sMinute = '0' + minutes.toString();
+    } else
+      sMinute = minutes.toString();
+
+    int seconds = (start % 60);
+    String sSeconds = '';
+    if (seconds.toString().length == 1) {
+      sSeconds = '0' + seconds.toString();
+    } else
+      sSeconds = seconds.toString();
+
+    return sMinute + ':' + sSeconds;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    startTimmer();
+  }
+
+  @override
+  void dispose() {
+    _timmerInstance.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: Colors.white,
+          ),
+          padding: EdgeInsets.all(50.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(
+                height: 10.0,
+              ),
+              Text(
+                'VOICE CALL',
+                style: TextStyle(
+                    color: Colors.deepPurpleAccent,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 15),
+              ),
+              SizedBox(
+                height: 20.0,
+              ),
+              Text(
+                receiver_name,
+                style: TextStyle(
+                    color: Colors.deepPurpleAccent,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20),
+              ),
+              SizedBox(
+                height: 20.0,
+              ),
+              Text(
+                _timmer,
+                style: TextStyle(
+                    color: Colors.deepPurpleAccent,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 15),
+              ),
+              SizedBox(
+                height: 20.0,
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(200.0),
+                child: Image.network(
+                  receiver_pic,
+                  height: 200.0,
+                  width: 200.0,
+                ),
+              ),
+              SizedBox(
+                height: 50.0,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  FunctionalButton(
+                    title: 'Speaker',
+                    icon: Icons.phone_in_talk,
+                    onPressed: () {},
+                  ),
+                  FunctionalButton(
+                    title: 'Video Call',
+                    icon: Icons.videocam,
+                    onPressed: () {},
+                  ),
+                  FunctionalButton(
+                    title: 'Mute',
+                    icon: Icons.mic_off,
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 120.0,
+              ),
+              FloatingActionButton(
+                onPressed: () {},
+                elevation: 20.0,
+                shape: CircleBorder(side: BorderSide(color: Colors.red)),
+                mini: false,
+                child: Icon(
+                  Icons.call_end,
+                  color: Colors.red,
+                ),
+                backgroundColor: Colors.red[100],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FunctionalButton extends StatefulWidget {
+  final title;
+  final icon;
+  final Function() onPressed;
+
+  const FunctionalButton({Key key, this.title, this.icon, this.onPressed})
+      : super(key: key);
+
+  @override
+  _FunctionalButtonState createState() => _FunctionalButtonState();
+}
+
+class _FunctionalButtonState extends State<FunctionalButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        RawMaterialButton(
+          onPressed: widget.onPressed,
+          splashColor: Colors.deepPurpleAccent,
+          fillColor: Colors.white,
+          elevation: 10.0,
+          shape: CircleBorder(),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Icon(
+              widget.icon,
+              size: 30.0,
+              color: Colors.deepPurpleAccent,
+            ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+          child: Text(
+            widget.title,
+            style: TextStyle(fontSize: 15.0, color: Colors.deepPurpleAccent),
+          ),
+        )
+      ],
+    );
   }
 }
 

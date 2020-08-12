@@ -31,6 +31,7 @@ class ChatController{
       'text': Message,
       'senderID': user.email,
       'type': type,
+      'time': FieldValue.serverTimestamp(),
     });
 
     _firestore
@@ -41,6 +42,7 @@ class ChatController{
       'text': Message,
       'senderID': user.email,
       'type': type,
+      'time': FieldValue.serverTimestamp(),
     });
     }
   Future<void> sendImage(File file,String receiverUID) async {

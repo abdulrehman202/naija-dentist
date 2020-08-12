@@ -284,7 +284,7 @@ Timer t;
                                       MaterialPageRoute(
                                           builder: (context) =>
                                               ChatScreen(
-                                                  title.patientId)),
+                                                  title.patientId,title.name,title.uploadedFileURL)),
                                     );
                                     //t.cancel();
                                   },

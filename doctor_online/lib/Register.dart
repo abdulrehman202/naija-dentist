@@ -263,6 +263,7 @@ class SignUp extends State<_SignUp> {
           if (_selectedtype != 'Account Type') {
             LoginController loginController = new LoginController();
             print('come');
+            _email = _email.toLowerCase();
             Future<String> user =
                 loginController.CreateNewUser(_email, _password);
             if (user.toString().compareTo(' ') != 0) {
