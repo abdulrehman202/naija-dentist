@@ -24,7 +24,7 @@ import 'Classes/DoctorAppointments.dart';
 import 'Controllers/ChatController.dart';
 
 DoctorAppointments apt;
-var channel_id;
+
 
 Future<void> getUID()
 async {
@@ -35,6 +35,7 @@ async {
   uemail=user.email;
 }
 String receiver,uid,uemail,receiver_name,receiver_pic;
+var channel_id;
 
 class ChatScreen extends StatelessWidget {
 
@@ -44,7 +45,7 @@ class ChatScreen extends StatelessWidget {
     getUID();
     receiver_name = name;
     receiver_pic = picURL;
-    channel_id = '1';
+    channel_id = TextEditingController();
   }
 
   @override
@@ -72,6 +73,9 @@ class ChatScreenPage extends StatefulWidget {
 
 class _ChatScreenPageState extends State<ChatScreenPage> {
 
+
+  /// if channel textField is validated to have error
+  bool _validateError = false;
   ClientRole _role = ClientRole.Broadcaster;
   MediaQueryData queryData;
   WColors myColors;
@@ -80,15 +84,16 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
   OnEmojiSelected onEmojiSelected;
 
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void initState() {
-    super.initState();
-
-  }
+//  @override
+//  void dispose() {
+//    channel_id.dispose();
+//    super.dispose();
+//  }
+//
+//  @override
+//  void initState() {
+//    super.initState();
+//  }
 
 
   @override
@@ -168,7 +173,12 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                     size: 24,
                   ),
                   color: myColors.appBarIcons,
-                  onPressed: onJoin,
+                  onPressed:()
+                  {
+                    channel_id.text = uid;
+                    ChatController().sendMessage(channel_id.text, receiver, 'videocall');
+                    onJoin();
+                  } ,
                 ),
                 IconButton(
                   icon: Icon(
@@ -176,17 +186,17 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                     size: 24,
                   ),
                   color: myColors.appBarIcons,
-                  onPressed: () {},
+                  onPressed: onJoin,
                 ),
               ],
             ),
             resizeToAvoidBottomPadding: false,
             backgroundColor: const Color(0xffffffff),
-            body: SafeArea(
-              child:
+            body:
               Transform.translate(
                 offset: Offset(0.0,-1*MediaQuery.of(context).viewInsets.bottom),
-                child: Column(
+                child: SafeArea(
+                  child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
@@ -212,7 +222,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                                     List<File> files = await FilePicker.getMultiFile(
                                       type: FileType.custom,
                                       allowedExtensions: [ 'pdf', 'doc'],
-                                    );
+                                    ).then((value) {} );
                                   },
                                 ),
                               ),
@@ -263,7 +273,7 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                                     size: 24,
                                   ),
                                   color: myColors.bottomBarIcons,
-                                  onPressed: () {
+                                  onPressed: (){
                                     print('mic');
                                   },
                                 ),
@@ -338,39 +348,40 @@ class _ChatScreenPageState extends State<ChatScreenPage> {
                           ),
                         ),
                       ),
+                    Visibility(
+                      visible: false,
+                      child: TextField(
+                        controller: channel_id,
+                      ),
+                    ),
                   ],
                 ),
               ),
-
-
-
-            )
+            ),
     );
   }
 
   Future<void> onJoin() async {
-
-    ChatController().sendMessage(uid, receiver, 'videocall');
-    channel_id = uid;
-
-    LoginController controller = new LoginController();
-    FirebaseUser user=await controller.getCurrentUser();
     // update input validation
     setState(() {
+      channel_id.text.isEmpty
+          ? _validateError = true
+          : _validateError = false;
     });
-
+    if (channel_id.text.isNotEmpty) {
       // await for camera and mic permissions before pushing video page
       await _handleCameraAndMic();
       // push video page with given channel name
       await Navigator.push(
-        this.context,
+        context,
         MaterialPageRoute(
           builder: (context) => CallPage(
-            channelName: channel_id,
+            channelName: channel_id.text,
             role: _role,
           ),
         ),
       );
+    }
   }
 
   Future<void> _handleCameraAndMic() async {
@@ -444,7 +455,7 @@ class MessageBubble extends StatelessWidget{
                       ),
                       errorWidget: (context, url, error) => Material(
                         child: Image.asset(
-                          'images/error1.jpeg',
+                          'images/dr.jpeg',
                           width: 200.0,
                           height: 200.0,
                           fit: BoxFit.cover,
@@ -512,32 +523,32 @@ class MessageStream extends StatelessWidget{
             print('Receiver id: ${receiver.toString()}');
             print(msgType.toString());
 
-              if(msgType == 'videocall' && msgSender != uemail)
+            if(msgType == 'videocall')
             {
-              Fluttertoast.showToast(
+              if(msgSender!=uemail){
+                  Fluttertoast.showToast(
                   msg: "You have an incoming video call. Tap on video icon at top to join",
                   toastLength: Toast.LENGTH_SHORT,
                   gravity: ToastGravity.CENTER,
                   timeInSecForIosWeb: 1,
                   textColor: Colors.white,
-                  fontSize: 16.0
+                  fontSize: 16.0,
+                  backgroundColor: Colors.black54,
               );
-            channel_id = msgText;
+            channel_id.text = receiver;
+              }
             }
 
             else
               {
                 msgBubble = MessageBubble(text: msgText,Sender: msgSender, isMe: msgSender == uemail, isText: msgType == 'text');
 
+                messageWidgets.add(msgBubble);
               }
 
-            messageWidgets.add(msgBubble);
           }
           return Expanded(
-            child :
-            ListView(
-              physics: NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
+            child: ListView(
               reverse: true,
               children:  messageWidgets,
             ),
