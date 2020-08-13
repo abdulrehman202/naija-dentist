@@ -65,6 +65,7 @@ class _CallPageState extends State<CallPage> {
   Future<void> _initAgoraRtcEngine() async {
     await AgoraRtcEngine.create(APP_ID);
     await AgoraRtcEngine.enableVideo();
+    await AgoraRtcEngine.enableAudio();
     await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await AgoraRtcEngine.setClientRole(widget.role);
   }

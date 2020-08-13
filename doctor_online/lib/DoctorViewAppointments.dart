@@ -17,6 +17,7 @@ class DoctorViewAppointments extends StatelessWidget {
     debugShowCheckedModeBanner:
     false;
     return MaterialApp(
+
       home: new _DoctorAppointment_(),
     );
   }
@@ -193,7 +194,7 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                     constraints: BoxConstraints(
                                       minWidth: 150,
                                       maxWidth:
-                                      MediaQuery.of(context).size.width -
+                                          MediaQuery.of(context).size.width -
                                               40,
                                     ),
                                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
@@ -215,7 +216,7 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                                           MediaQuery.of(context)
                                                               .size
                                                               .width,
-                                                      height: 80.0,
+                                                      height: 80,
                                                       fit: BoxFit.fill,
                                                     ),
                                                   ),
@@ -302,14 +303,16 @@ class DoctorViewAppointment extends State<_DoctorAppointment_> {
                                                     ),
                                                     onPressed: () {
                                                       print(index);
-                                                       Navigator.push(
-                                                         context,
-                                                         MaterialPageRoute(
-                                                             builder: (context) =>
-                                                                 ChatScreen(
-                                                                     apt.elementAt(
-                                                                         index).patientId.toString(),apt.elementAt(index).name,apt.elementAt(index).uploadedFileURL)),
-                                                       );
+                                                      print(temp_apt.patientId);
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                ChatScreen(
+                                                                    apt.elementAt(
+                                                                        index).patientId.toString(),apt.elementAt(index).name,apt.elementAt(index).uploadedFileURL)),
+
+                                                      );
                                                     },
                                                   ),
                                                 ),

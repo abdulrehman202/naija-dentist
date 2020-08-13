@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'Controllers/LoginController.dart';
 import 'DentistSetupProfile.dart';
 import 'DoctorViewAppointments.dart';
+//import 'DoctorViewAppointmentstemp.dart';
 import 'appointment.dart';
 
 void main() {
@@ -40,6 +41,9 @@ class _Login extends State<Login> {
   bool _displayMsg = false;
   var _msg = "Select profile Image";
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  bool _progressVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -140,10 +144,19 @@ class _Login extends State<Login> {
                         textAlign: TextAlign.left,
                       ),
                     ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Visibility(
+                      visible: _progressVisible,
+                      child: CircularProgressIndicator(),
+                    ),
                     Container(
-                      margin: EdgeInsets.only(top: 20),
                       child: RaisedButton(
                         onPressed: () {
+                          setState(() {
+                            _progressVisible = true;
+                          });
                           _functionSignUp();
                         },
                         textColor: Colors.white,
@@ -234,22 +247,26 @@ class _Login extends State<Login> {
       // );
       // Navigator.push(context,
       //     MaterialPageRoute(builder: (context) => PatientViewDoctors()));
-
       if ((_email == null) | (_password == null)) {
         setState(() {
-          _displayMsg=true;
-          _msg="Incomplete Fields";
-          return;
+          _displayMsg = true;
+          _progressVisible = false;
+          _msg = "Incomplete Fields";
         });
+        return;
       }
       _email = _email.replaceAll(new RegExp(r"\s+"), "");
-
       _password = _password.trim();
       _validateInputs();
-      _email = _email.toLowerCase();
       if (_autoValidate == false) {
+        _email = _email.toLowerCase();
+
         LoginController loginController = new LoginController();
         String user = await loginController.CheckSignIn(_email, _password);
+        setState(() {
+          _progressVisible = false;
+          _displayMsg = false;
+        });
         if (user.toString().compareTo(' ') != 0) {
           print('successful');
 
@@ -257,6 +274,7 @@ class _Login extends State<Login> {
               .collection("Person")
               .document(user)
               .get();
+
           if (value01.data != null) {
             var type = value01.data["PType"];
             if (type == 'P') {
@@ -274,10 +292,11 @@ class _Login extends State<Login> {
           }
         } else {
           setState(() {
-          _displayMsg=true;
-          _msg="Incorrect Username or Password";
+            _progressVisible = false;
+            _displayMsg = true;
+            _msg = "Incorrect Username or Password";
+          });
           return;
-        });
         }
       }
     } catch (e) {

@@ -41,6 +41,8 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
   File _image;
   File _certificate;
   var _descriptionController = new TextEditingController();
+
+  bool _progressVisible = false;
   _DentistSetProfile(this.email);
   bool _checkBoxVal = true;
   String _selectedGender;
@@ -362,6 +364,13 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
                 ],
               ),
             ),
+            SizedBox(
+              height: 10,
+            ),
+            Visibility(
+              visible: _progressVisible,
+              child: CircularProgressIndicator(),
+            ),
             Container(
               child: Row(
                 children: <Widget>[
@@ -388,6 +397,9 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
                       padding: EdgeInsets.all(5.0),
                       child: RaisedButton(
                         onPressed: () {
+                          setState(() {
+                            _progressVisible = true;
+                          });
                           SaveDoctorData();
                         },
                         color: Color(0xff4e45ff),
@@ -443,6 +455,7 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
         setState(() {
           _msg = "Please upload the profile pic";
           _displayMsg = true;
+          _progressVisible = false;
         });
         return;
       }
@@ -450,6 +463,7 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
         setState(() {
           _msg = "Please upload your certificate";
           _displayMsg = true;
+          _progressVisible = false;
         });
         return;
       }
@@ -467,6 +481,7 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
         setState(() {
           _msg = "You are required to fill all the fields";
           _displayMsg = true;
+          _progressVisible = false;
         });
         return;
       }
@@ -484,8 +499,13 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
       Doctor _doctor = new Doctor(_officeAddressController.text,
           _yearController.text, _descriptionController.text);
       DoctorController controller = new DoctorController();
-      bool result = await controller.addDoctorRecord(_person, _doctor,_image,_certificate);
+      bool result = await controller.addDoctorRecord(
+          _person, _doctor, _image, _certificate);
       print(result);
+      setState(() {
+        _progressVisible = false;
+        _displayMsg = false;
+      });
       if (result == true) {
         Navigator.push(
           context,
@@ -496,6 +516,7 @@ class _DentistSetProfile extends State<_DentistSetupProfile_> {
       setState(() {
         _msg = "You must agree to our terms of use & privacy policy";
         _displayMsg = true;
+        _progressVisible = false;
       });
     }
   }

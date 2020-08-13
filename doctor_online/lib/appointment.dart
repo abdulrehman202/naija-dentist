@@ -5,7 +5,6 @@ import 'package:doctorapp/appointment_class.dart';
 import 'Controllers/ShowDoctorController.dart';
 import 'appointment_class.dart';
 import 'Chat_List.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PatientViewDoctors extends StatelessWidget {
   //String email;
@@ -36,28 +35,6 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
     setState(() {
       if (myList != null) apt = myList;
     });
-  }
-
-  RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
-
-  void _onRefresh() async{
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
-    // if failed,use refreshFailed()
-    _refreshController.refreshCompleted();
-  }
-
-  void _onLoading() async{
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
-    // if failed,use loadFailed(),if no data return,use LoadNodata()
-    apt = ShowDoctorController().getDoctorAppointments() as List<appointment_class>;
-    if(mounted)
-      setState(() {
-
-      });
-    _refreshController.loadComplete();
   }
 
   @override
@@ -164,37 +141,7 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                   print('apt len ${apt.length}');
                   return (apt != null)
                       ? Flexible(
-                          child: SmartRefresher(
-                            enablePullDown: true,
-                            enablePullUp: true,
-                            header: WaterDropHeader(),
-                            footer: CustomFooter(
-                              builder: (BuildContext context,LoadStatus mode){
-                                Widget body ;
-                                if(mode==LoadStatus.idle){
-                                  body =  Text("pull up load");
-                                }
-                                else if(mode==LoadStatus.loading){
-                                  body =  CupertinoActivityIndicator();
-                                }
-                                else if(mode == LoadStatus.failed){
-                                  body = Text("Load Failed!Click retry!");
-                                }
-                                else if(mode == LoadStatus.canLoading){
-                                  body = Text("release to load more");
-                                }
-                                else{
-                                  body = Text("No more Data");
-                                }
-                                return Container(
-                                  height: 55.0,
-                                  child: Center(child:body),
-                                );
-                              },
-                            ),
-                            controller: _refreshController,
-                            onRefresh: _onRefresh,
-                            onLoading: _onLoading,
+                          child: SingleChildScrollView(
                             child: ListView.builder(
                               scrollDirection: Axis.vertical,
                               shrinkWrap: true,
@@ -207,11 +154,11 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                       constraints: BoxConstraints(
                                         minWidth: 150,
                                         maxWidth:
-                                        MediaQuery.of(context).size.width -
-                                            40,
+                                            MediaQuery.of(context).size.width -
+                                                60,
                                       ),
                                       margin:
-                                      EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                          EdgeInsets.fromLTRB(10, 10, 10, 0),
                                       child: Card(
                                         child: Column(
                                           children: <Widget>[
@@ -223,15 +170,15 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                                   padding: EdgeInsets.all(10),
                                                   child: ClipRRect(
                                                     borderRadius:
-                                                    BorderRadius.circular(
-                                                        80.0),
+                                                        BorderRadius.circular(
+                                                            80.0),
                                                     child: Image.network(
                                                       temp_apt.uploadedFileURL,
                                                       width:
-                                                      MediaQuery.of(context)
-                                                          .size
-                                                          .width,
-                                                      height: 80.0,
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                      height: 80,
                                                       fit: BoxFit.fill,
                                                     ),
                                                   ),
@@ -249,7 +196,7 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                                         overflow: TextOverflow
                                                             .visible,
                                                         textAlign:
-                                                        TextAlign.center,
+                                                            TextAlign.center,
                                                       ),
                                                     ),
                                                     Container(
@@ -260,7 +207,7 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                                           fontSize: 20,
                                                         ),
                                                         textAlign:
-                                                        TextAlign.center,
+                                                            TextAlign.center,
                                                         overflow: TextOverflow
                                                             .visible,
                                                       ),
@@ -275,7 +222,7 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                                         overflow: TextOverflow
                                                             .visible,
                                                         textAlign:
-                                                        TextAlign.center,
+                                                            TextAlign.center,
                                                       ),
                                                     ),
                                                     Container(
@@ -286,7 +233,7 @@ class _PatientViewDoctors extends State<_PatientViewDoctors_> {
                                                           fontSize: 15,
                                                         ),
                                                         textAlign:
-                                                        TextAlign.center,
+                                                            TextAlign.center,
                                                         overflow: TextOverflow
                                                             .visible,
                                                       ),

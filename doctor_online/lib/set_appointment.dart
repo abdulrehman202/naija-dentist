@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:doctorapp/appointment_class.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'Classes/SetAppointment.dart';
 import 'Controllers/SetAppointmentController.dart';
@@ -28,9 +29,11 @@ class _set_appontment extends StatefulWidget {
 }
 
 class _set_appontment_ extends State<_set_appontment> {
-   appointment_class obj;
+  appointment_class obj;
+
+  bool _progressVisible = false;
   _set_appontment_(this.obj);
-  
+  bool _displayMsg = false;
   static int _5m = 3, _10m = 7, _15m = 10, _20m = 15, _30m = 20, _1h = 30;
 
   static const communicationOptionList = <String>[
@@ -60,7 +63,7 @@ class _set_appontment_ extends State<_set_appontment> {
   String chosenMethod = 'Audio', chosenRate, chosenDate, chosenTime;
 
   static List<String> list_Rate;
-
+  var _msg = "Select profile Image";
   final dateController = TextEditingController();
   final timeController = TextEditingController();
 
@@ -71,24 +74,18 @@ class _set_appontment_ extends State<_set_appontment> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Book your Appointment'),
-        actions: <Widget>
-        [
-        IconButton(
-          icon: Icon(Icons.message),
-          onPressed: ()
-          {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      ChatList()
-              ),
-            );
-          },
-        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.message),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatList()),
+              );
+            },
+          ),
         ],
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -108,7 +105,7 @@ class _set_appontment_ extends State<_set_appontment> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(100.0),
                           child: Image.network(
-                           obj.uploadedFileURL,
+                            obj.uploadedFileURL,
                             height: 120.0,
                             width: 120,
                             fit: BoxFit.cover,
@@ -145,6 +142,33 @@ class _set_appontment_ extends State<_set_appontment> {
                   ),
                 ),
               ),
+              SizedBox(
+                height: 10,
+              ),
+              _displayMsg
+                  ? Text(
+                      '$_msg',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[500],
+                          fontFamily: 'Oxygen'),
+                    )
+                  : Container(),
+              SizedBox(
+                height: 10,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '*All the fields are required',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red[500],
+                      fontFamily: 'Oxygen'),
+                ),
+              ),
               Row(
                 children: <Widget>[
                   Container(
@@ -163,6 +187,7 @@ class _set_appontment_ extends State<_set_appontment> {
                       width: 200,
                       margin: EdgeInsets.only(left: 10),
                       child: TextField(
+                        readOnly: true,
                         onChanged: (String value) {
                           chosenDate = value;
                         },
@@ -211,6 +236,7 @@ class _set_appontment_ extends State<_set_appontment> {
                       width: 200,
                       margin: EdgeInsets.only(left: 10),
                       child: TextField(
+                        readOnly: true,
                         onTap: () {
                           DateTime now = DateTime.now();
                           showTimePicker(
@@ -357,6 +383,13 @@ class _set_appontment_ extends State<_set_appontment> {
                   ),
                 ],
               ),
+              SizedBox(
+                height: 10,
+              ),
+              Visibility(
+                visible: _progressVisible,
+                child: CircularProgressIndicator(),
+              ),
               Align(
                 alignment: Alignment.center,
                 child: Container(
@@ -370,14 +403,11 @@ class _set_appontment_ extends State<_set_appontment> {
                         color: Colors.white,
                       ),
                     ),
-                    onPressed: () {
-                      print('okay');
-                      SetAppointmentController controller =
-                          new SetAppointmentController();
-                      SetAppointmentClass c = new SetAppointmentClass(
-                          dateController.text, timeController.text,chosenMethod,chosenRate);
-
-                      controller.AddPatientsRecords(c,obj.doctorID);
+                    onPressed: () async {
+                      setState(() {
+                        _progressVisible = true;
+                      });
+                      await setAppointmentRecord();
                     },
                   ),
                 ),
@@ -389,7 +419,7 @@ class _set_appontment_ extends State<_set_appontment> {
     );
   }
 
- getRating(var count) {
+  getRating(var count) {
     List<Widget> list = new List<Widget>();
     if (count != null) {
       for (var i = 0; i < int.parse(count.toString()); i++) {
@@ -397,5 +427,38 @@ class _set_appontment_ extends State<_set_appontment> {
       }
     }
     return new Row(children: list);
+  }
+
+  setAppointmentRecord() async {
+    if ((dateController.text == '') |
+        (timeController.text == '') |
+        (chosenMethod == '') |
+        (chosenRate == null)) {
+      setState(() {
+        _msg = "You are required to fill all the fields";
+        _displayMsg = true;
+        _progressVisible = false;
+      });
+      return;
+    }
+
+    SetAppointmentController controller = new SetAppointmentController();
+    SetAppointmentClass c = new SetAppointmentClass(
+        dateController.text, timeController.text, chosenMethod, chosenRate);
+
+    bool result = await controller.AddPatientsRecords(c, obj.doctorID);
+    setState(() {
+      _progressVisible = false;
+      _displayMsg = false;
+    });
+    if (result) {
+      Fluttertoast.showToast(
+          msg: "Appointment added",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    } else {}
   }
 }

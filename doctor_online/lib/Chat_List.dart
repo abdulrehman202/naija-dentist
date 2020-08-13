@@ -285,8 +285,7 @@ Timer t;
                                           builder: (context) =>
                                               ChatScreen(
                                                   title.patientId,title.name,title.uploadedFileURL)),
-                                    );
-                                    //t.cancel();
+                                    );//t.cancel();
                                   },
                                 );
                               },
